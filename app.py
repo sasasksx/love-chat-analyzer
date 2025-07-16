@@ -11,7 +11,14 @@ st.caption("Upload your exported WhatsApp chat (.txt format only)")
 uploaded_file = st.file_uploader("Upload WhatsApp Chat (.txt)", type=["txt"])
 
 positive_words = ["love", "miss", "baby", "sweet", "dear", "heart", "cute", "kiss", "hug", "😍", "😘", "❤️", "💕", "💖", "💘", "sweetheart"]
-emoji_pattern = emoji.get_emoji_regexp()
+
+# ✅ Use custom emoji regex instead of emoji.get_emoji_regexp()
+emoji_pattern = re.compile("["
+    u"\U0001F600-\U0001F64F"  # emoticons
+    u"\U0001F300-\U0001F5FF"  # symbols & pictographs
+    u"\U0001F680-\U0001F6FF"  # transport & map symbols
+    u"\U0001F1E0-\U0001F1FF"  # flags
+    "]+", flags=re.UNICODE)
 
 def parse_chat(text):
     messages = []
@@ -35,7 +42,7 @@ def calculate_love_score(messages):
             score += 1
             interest[sender] += 1
         word_counter.update(re.findall(r'\b\w+\b', lowered))
-        emoji_counter.update(char for char in msg if char in emoji.EMOJI_DATA)
+        emoji_counter.update(emoji_pattern.findall(msg))
 
     if messages:
         score = int((score / len(messages)) * 100)
